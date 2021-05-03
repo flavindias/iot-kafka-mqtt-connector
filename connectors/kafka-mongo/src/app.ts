@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { Kafka } from 'kafkajs';
-import {MongoClient} from 'mongodb';
+import {MongoClient, ObjectId} from 'mongodb';
 dotenv.config();
 
 const { KAFKA_BROKERS, KAFKA_TOPICS, MONGO_URL, DB_NAME } = process.env;
@@ -40,11 +40,10 @@ const run = async () => {
 					.collection(topic)
 					.insertOne({
 						...data,
-						bess: message.key.toString(),
-						createdAt: tzCloud ? tzCloud : tz,
-						updatedAt: tzCloud ? tzCloud : tz
+						bess: new ObjectId(message.key.toString()),
+						createdAt: tzCloud ?? tz,
+						updatedAt: tzCloud ?? tz
 					});
-				console.log(result.insertedCount);
 				if(result.insertedCount === 1){
 					console.log(new Date().toISOString(), partition, message.key.toString(), topic);
 				}
@@ -53,7 +52,6 @@ const run = async () => {
 				}
 			},
 		});
-
 	}
 	catch(error){
 		console.error(error);

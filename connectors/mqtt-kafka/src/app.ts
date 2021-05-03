@@ -1,6 +1,7 @@
-import dotenv from 'dotenv';
 import mqtt from 'mqtt';
-import { Kafka } from 'kafkajs';
+import dotenv from 'dotenv';
+import { v4 as uuidv4 } from 'uuid';
+import { Kafka, CompressionTypes } from 'kafkajs';
 dotenv.config();
 
 const { MQTT_URL, MQTT_PORT, MQTT_USER, MQTT_PASS, KAFKA_BROKERS, KAFKA_TOPICS } = process.env;
@@ -36,8 +37,15 @@ const publishKafka = async (topic, message, key) => {
 	await producer.connect();
 	const response = await producer.send({
 		topic,
+		compression: CompressionTypes.GZIP,
 		messages: [
-			{ value: message, key },
+			{ 
+				key, 
+				value: message, 
+				headers: {
+					'correlation-id': `mqtt-kafka-connector-${uuidv4()}`,
+					'system-id': 'mqtt-kafka-connector'
+				} },
 		],
 	});
 	if(response[0].errorCode === 0){
