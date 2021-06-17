@@ -29,26 +29,37 @@ const run = async () => {
 
 		await consumer.run({
 			eachMessage: async ({ topic, partition, message }) => {
-				const data = JSON.parse(message.value.toString()).Data;
-				const tzCloud = JSON.parse(message.value.toString()).TimestampCloud;
-				const tz = `${JSON.parse(message.value.toString()).Timestamp}`.length === 19 ? 
-					`${JSON.parse(message.value.toString()).Timestamp}.000Z` : 
-					JSON.parse(message.value.toString()).Timestamp;
-
-				const result = await dbClient
-					.db(DB_NAME)
-					.collection(topic)
-					.insertOne({
-						...data,
-						bess: new ObjectId(message.key.toString()),
-						createdAt: tzCloud ?? tz,
-						updatedAt: tzCloud ?? tz
-					});
-				if(result.insertedCount === 1){
-					console.log(new Date().toISOString(), partition, message.key.toString(), topic);
+				try{
+					JSON.parse(message.value.toString());	
 				}
-				else{
-					console.error(new Date().toISOString(), partition, message.key.toString(), topic);
+				catch(error){
+					console.error(error);
+					console.error('ERROR', new Date().toISOString(), partition, message.key.toString(), `message: ${message.value.toString()}`, topic);
+				}
+				finally{
+					if(message.value.toString() !== 'message'){
+						const data = JSON.parse(message.value.toString()).Data;
+						const tzCloud = JSON.parse(message.value.toString()).TimestampCloud;
+						const tz = `${JSON.parse(message.value.toString()).Timestamp}`.length === 19 ? 
+							`${JSON.parse(message.value.toString()).Timestamp}.000Z` : 
+							JSON.parse(message.value.toString()).Timestamp;
+
+						const result = await dbClient
+							.db(DB_NAME)
+							.collection(topic)
+							.insertOne({
+								...data,
+								bess: new ObjectId(message.key.toString()),
+								createdAt: tzCloud ?? tz,
+								updatedAt: tzCloud ?? tz
+							});
+						if(result.insertedCount === 1){
+							console.log(new Date().toISOString(), partition, message.key.toString(), topic);
+						}
+						else{
+							console.error('ERROR: ', new Date().toISOString(), partition, message.key.toString(), topic);
+						}
+					}
 				}
 			},
 		});
