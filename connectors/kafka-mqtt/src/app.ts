@@ -25,7 +25,8 @@ mqttClient.on('error', (err) => {
 mqttClient.on('connect', () => {
 	console.log('mqtt client connected');
 });
-mqttClient.subscribe('bess/#', { qos: 0 });
+
+// mqttClient.subscribe('bess/#', { qos: 0 });
 
 const kafka = new Kafka({
 	clientId: 'kafka-mongo-connector',
@@ -34,12 +35,6 @@ const kafka = new Kafka({
 const consumer = kafka.consumer({ groupId: 'kafka-mqtt-connector' });
 const publishMqtt = async (message, topic) => {
 	try{
-		// const payload = JSON.stringify({
-		// 	Data: message.value.toString(),
-		// 	Timestamp: new Date().toISOString(),
-		// 	TimestampCloud: new Date().toISOString
-		// });
-		console.log(message.value.toJSON());
 		await mqttClient.publish(`bess/${message.key.toString()}/${topic}`, message.value.toString());
 		console.log(new Date().toISOString(), message.key.toString(), topic);
 	}
@@ -52,19 +47,21 @@ const run = async () => {
 		await consumer.connect();
 		KAFKA_MQTT_PUB_TOPICS.split(',').map(async(topic) => {
 			await consumer.subscribe({ topic, fromBeginning: true });
+			console.log(topic);
 		});
 
 		await consumer.run({
 			eachMessage: async ({ topic, message }) => {
 				// convert kafka format ( topic_name )to mqtt format (topic/name)
 				const topicMqtt = topic.split('_').join('/');
+				console.log(topicMqtt);
 				publishMqtt(message, topicMqtt);
 			},
 		});
 
 	}
 	catch(error){
-		console.error(error);
+		console.error(`ERROR: ${error}`);
 	}
 };
 run();

@@ -5,7 +5,7 @@ import { Kafka, CompressionTypes } from 'kafkajs';
 dotenv.config();
 
 const { MQTT_SUB_URL, MQTT_SUB_PORT, MQTT_SUB_USER, MQTT_SUB_PASS, KAFKA_BROKERS, KAFKA_MQTT_SUB_TOPICS } = process.env;
-console.log(MQTT_SUB_URL, MQTT_SUB_PORT, MQTT_SUB_USER, MQTT_SUB_PASS, KAFKA_BROKERS, KAFKA_MQTT_SUB_TOPICS);
+
 const mqttClient  = mqtt.connect(MQTT_SUB_URL, {
 	clientId: 'MQTT Client',
 	host: MQTT_SUB_URL,
@@ -87,11 +87,8 @@ const main = async () => {
 		
 		mqttClient.on('message', async (topicName, message) => {
 			// message is Buffer
-      
 			const [, key, ...topic] = topicName.split('/');
 			await publishKafka(topic.join('_'), message.toString(), key);
-			console.log(topic, topicName);
-			
 		});
 		mqttClient.on('close', () => {
 			console.log('MQTT client disconnected');
