@@ -4,14 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { Kafka, CompressionTypes } from 'kafkajs';
 dotenv.config();
 
-const { MQTT_URL, MQTT_PORT, MQTT_USER, MQTT_PASS, KAFKA_BROKERS, KAFKA_TOPICS } = process.env;
-console.log(MQTT_URL, MQTT_PORT, MQTT_USER, MQTT_PASS, KAFKA_BROKERS, KAFKA_TOPICS);
-const mqttClient  = mqtt.connect(MQTT_URL, {
+const { MQTT_SUB_URL, MQTT_SUB_PORT, MQTT_SUB_USER, MQTT_SUB_PASS, KAFKA_BROKERS, KAFKA_MQTT_SUB_TOPICS } = process.env;
+console.log(MQTT_SUB_URL, MQTT_SUB_PORT, MQTT_SUB_USER, MQTT_SUB_PASS, KAFKA_BROKERS, KAFKA_MQTT_SUB_TOPICS);
+const mqttClient  = mqtt.connect(MQTT_SUB_URL, {
 	clientId: 'MQTT Client',
-	host: MQTT_URL,
-	port: parseInt(MQTT_PORT),
-	username: MQTT_USER,
-	password: MQTT_PASS,
+	host: MQTT_SUB_URL,
+	port: parseInt(MQTT_SUB_PORT),
+	username: MQTT_SUB_USER,
+	password: MQTT_SUB_PASS,
 	clean: true,
 	protocol: 'ssl',
 });
@@ -74,7 +74,7 @@ const main = async () => {
 		const admin = kafka.admin();
 		await admin.connect();
 		
-		const topics = KAFKA_TOPICS.split(',').map(topic => {
+		const topics = KAFKA_MQTT_SUB_TOPICS.split(',').map(topic => {
 			return {
 				topic,
 				numPartitions: 2,
@@ -87,9 +87,11 @@ const main = async () => {
 		
 		mqttClient.on('message', async (topicName, message) => {
 			// message is Buffer
-			const [, key, topic] = topicName.split('/');
-			await publishKafka(topic, message.toString(), key);
-			// console.log(topic, 'OK');
+      
+			const [, key, ...topic] = topicName.split('/');
+			await publishKafka(topic.join('_'), message.toString(), key);
+			console.log(topic, topicName);
+			
 		});
 		mqttClient.on('close', () => {
 			console.log('MQTT client disconnected');

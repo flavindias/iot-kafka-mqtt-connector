@@ -106,3 +106,9 @@ dist
 
 # Mongo files
 data/
+
+# kafka container folder
+kafka/
+
+# zookeeper contaiter folder
+zookeeper/

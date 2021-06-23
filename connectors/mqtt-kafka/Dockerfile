@@ -15,5 +15,9 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+# env
+RUN rm /usr/src/app/.env
+# COPY dockerenv /usr/src/app/.env
+
 CMD ["npm", "start"]
 EXPOSE 3000

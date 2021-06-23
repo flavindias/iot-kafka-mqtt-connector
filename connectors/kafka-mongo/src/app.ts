@@ -3,7 +3,7 @@ import { Kafka } from 'kafkajs';
 import {MongoClient, ObjectId} from 'mongodb';
 dotenv.config();
 
-const { KAFKA_BROKERS, KAFKA_TOPICS, MONGO_URL, DB_NAME } = process.env;
+const { KAFKA_BROKERS, KAFKA_STORAGE_TOPICS, MONGO_URL, DB_NAME } = process.env;
 const dbClient = new MongoClient(MONGO_URL, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
@@ -23,7 +23,7 @@ const consumer = kafka.consumer({ groupId: 'kafka-mongo-connector' });
 const run = async () => {
 	try {
 		await consumer.connect();
-		KAFKA_TOPICS.split(',').map(async(topic) => {
+		KAFKA_STORAGE_TOPICS.split(',').map(async(topic) => {
 			await consumer.subscribe({ topic, fromBeginning: true });
 		});
 
