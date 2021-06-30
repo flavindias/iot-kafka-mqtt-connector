@@ -13,7 +13,7 @@ const mqttClient  = mqtt.connect(MQTT_SUB_URL, {
 	username: MQTT_SUB_USER,
 	password: MQTT_SUB_PASS,
 	clean: true,
-	protocol: 'ssl',
+	protocol: 'ssl'
 });
 
 // Mqtt error calback
@@ -30,12 +30,23 @@ mqttClient.subscribe('bess/#', { qos: 0 });
 
 const kafka = new Kafka({
 	clientId: 'mqtt-kafka',
-	brokers: KAFKA_BROKERS.split(',')
+	brokers: KAFKA_BROKERS.split(','),
+	connectionTimeout: 3000,
+	retry: {
+		initialRetryTime: 100,
+		retries: 8
+	},
+	// ssl: false,
+	// sasl: {
+	// 	mechanism: 'plain',
+	// 	username: KAFKA_SUB_USER,
+	// 	password: KAFKA_SUB_PASS
+	// }
 });
 const producer = kafka.producer();
 		
 const publishKafka = async (topic, message, key) => {
-	await producer.connect();
+	
 	try{
 		JSON.parse(message);
 	}
@@ -43,6 +54,7 @@ const publishKafka = async (topic, message, key) => {
 		console.error(error, message);
 	}
 	finally{
+		await producer.connect();
 		if(message.length < 4){
 			console.log(typeof message, message);
 		}

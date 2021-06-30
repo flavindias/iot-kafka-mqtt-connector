@@ -15,7 +15,18 @@ dbClient.connect(async (err) => {
 });
 const kafka = new Kafka({
 	clientId: 'kafka-mongo-connector',
-	brokers: KAFKA_BROKERS.split(',')
+	brokers: KAFKA_BROKERS.split(','),
+	connectionTimeout: 3000,
+	retry: {
+		initialRetryTime: 100,
+		retries: 8
+	},
+	// ssl: true,
+	// sasl: {
+	// 	mechanism: 'plain',
+	// 	username: KAFKA_SUB_USER,
+	// 	password: KAFKA_SUB_PASS
+	// }
 });
 
 const consumer = kafka.consumer({ groupId: 'kafka-mongo-connector' });

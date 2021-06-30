@@ -50,7 +50,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
+  
   kafka-mongo:
     container_name: kafka-mongo
     build: ./connectors/kafka-mongo
@@ -65,7 +65,8 @@ services:
     env_file:
       - .env.docker
     networks:
-      - access-mongo
+      # - access-mongo
+      - api-bess-ms-main_webnet
       - access-kafka
 
   mqtt-kafka:
@@ -100,21 +101,21 @@ services:
     networks:
       - access-kafka
         
-  mongo:
-    container_name: mongo
-    image: mongo
-    restart: always
-    networks:
-      - access-mongo
-    ports:
-      - 27017:27017
-    volumes:
-      - ./data/db:/data/db
+  # mongo:
+  #   container_name: mongo
+  #   image: mongo
+  #   restart: always
+  #   networks:
+  #     - access-mongo
+  #   ports:
+  #     - 27017
+  #   volumes:
+  #     - ./data/db:/data/db
 
 networks:
   access-kafka: {}
   access-zookeeper: {}
   access-mongo: {}
-  # docker-kafka_default:
-  #   external: true
+  api-bess-ms-main_webnet:
+    external: true
 

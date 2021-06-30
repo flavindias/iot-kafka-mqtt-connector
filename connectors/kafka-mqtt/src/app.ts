@@ -30,7 +30,18 @@ mqttClient.on('connect', () => {
 
 const kafka = new Kafka({
 	clientId: 'kafka-mongo-connector',
-	brokers: KAFKA_BROKERS.split(',')
+	brokers: KAFKA_BROKERS.split(','),
+	connectionTimeout: 3000,
+	retry: {
+		initialRetryTime: 100,
+		retries: 8
+	},
+	// ssl: true,
+	// sasl: {
+	// 	mechanism: 'plain',
+	// 	username: KAFKA_PUB_USER,
+	// 	password: KAFKA_PUB_PASS
+	// }
 });
 const consumer = kafka.consumer({ groupId: 'kafka-mqtt-connector' });
 const publishMqtt = async (message, topic) => {
