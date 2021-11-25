@@ -3,9 +3,9 @@ import mqtt from 'mqtt';
 import { Kafka } from 'kafkajs';
 dotenv.config();
 
-const { MQTT_PUB_URL, MQTT_PUB_PORT, MQTT_PUB_USER, MQTT_PUB_PASS, KAFKA_BROKERS, KAFKA_MQTT_PUB_TOPICS } = process.env;
+const { MQTT_PUB_URL, MQTT_PUB_PORT, MQTT_PUB_USER, KAFKA_BROKERS, MQTT_PUB_PASS, KAFKA_MQTT_PUB_TOPICS } = process.env;
 const mqttClient  = mqtt.connect(MQTT_PUB_URL, {
-	clientId: 'MQTT Bess Publisher',
+	clientId: 'MQTT Bess Publisher Dev',
 	host: MQTT_PUB_URL,
 	port: parseInt(MQTT_PUB_PORT),
 	username: MQTT_PUB_USER,
@@ -29,7 +29,7 @@ mqttClient.on('connect', () => {
 // mqttClient.subscribe('bess/#', { qos: 0 });
 
 const kafka = new Kafka({
-	clientId: 'kafka-mongo-connector',
+	clientId: 'kafka-mongo-connector-dev',
 	brokers: KAFKA_BROKERS.split(','),
 	connectionTimeout: 3000,
 	retry: {
@@ -58,14 +58,12 @@ const run = async () => {
 		await consumer.connect();
 		KAFKA_MQTT_PUB_TOPICS.split(',').map(async(topic) => {
 			await consumer.subscribe({ topic, fromBeginning: true });
-			console.log(topic);
 		});
 
 		await consumer.run({
 			eachMessage: async ({ topic, message }) => {
 				// convert kafka format ( topic_name )to mqtt format (topic/name)
 				const topicMqtt = topic.split('_').join('/');
-				console.log(topicMqtt);
 				publishMqtt(message, topicMqtt);
 			},
 		});

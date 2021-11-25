@@ -66,14 +66,15 @@ services:
       - .env.docker
     networks:
       # - access-mongo
-      - api-bess-ms-main_webnet
+      # - api-bess-ms-main_webnet
       - access-kafka
+      - webnet
 
   mqtt-kafka:
     container_name: mqtt-kafka
     build: ./connectors/mqtt-kafka
-    depends_on:
-      - broker
+    # depends_on:
+      # - broker
     logging:
       options:
         max-size: "10m"
@@ -84,12 +85,13 @@ services:
       - ./.env.docker
     networks:
       - access-kafka
+      - webnet
 
   kafka-mqtt:
     container_name: kafka-mqtt
     build: ./connectors/kafka-mqtt
-    depends_on:
-      - broker
+    # depends_on:
+      # - broker
     logging:
       options:
         max-size: "10m"
@@ -100,6 +102,7 @@ services:
       - ./.env.docker
     networks:
       - access-kafka
+      - webnet
         
   # mongo:
   #   container_name: mongo
@@ -113,6 +116,9 @@ services:
   #     - ./data/db:/data/db
 
 networks:
+  webnet: {
+    driver: bridge
+  }
   access-kafka: {}
   access-zookeeper: {}
   access-mongo: {}

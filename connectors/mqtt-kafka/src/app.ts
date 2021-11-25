@@ -4,10 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { Kafka, CompressionTypes } from 'kafkajs';
 dotenv.config();
 
-const { MQTT_SUB_URL, MQTT_SUB_PORT, MQTT_SUB_USER, MQTT_SUB_PASS, KAFKA_BROKERS, KAFKA_MQTT_SUB_TOPICS } = process.env;
+const { MQTT_SUB_URL, MQTT_SUB_PORT, MQTT_SUB_USER, KAFKA_BROKERS, MQTT_SUB_PASS, KAFKA_MQTT_SUB_TOPICS } = process.env;
 
 const mqttClient  = mqtt.connect(MQTT_SUB_URL, {
-	clientId: 'MQTT Client',
+	clientId: 'MQTT Client Dev',
 	host: MQTT_SUB_URL,
 	port: parseInt(MQTT_SUB_PORT),
 	username: MQTT_SUB_USER,
@@ -29,8 +29,9 @@ mqttClient.on('connect', () => {
 mqttClient.subscribe('bess/#', { qos: 0 });
 
 const kafka = new Kafka({
-	clientId: 'mqtt-kafka',
+	clientId: 'mqtt-kafka-dev',
 	brokers: KAFKA_BROKERS.split(','),
+	
 	connectionTimeout: 3000,
 	retry: {
 		initialRetryTime: 100,

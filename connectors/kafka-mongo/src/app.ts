@@ -30,14 +30,16 @@ const kafka = new Kafka({
 });
 
 const consumer = kafka.consumer({ groupId: 'kafka-mongo-connector' });
-
+const subscribe = async (topics: string) => {
+  await Promise.all(topics.split(',').map(async(topic) => {
+    await consumer.subscribe({ topic, fromBeginning: true });
+  }));
+  run()
+  
+}
 const run = async () => {
 	try {
 		await consumer.connect();
-		KAFKA_STORAGE_TOPICS.split(',').map(async(topic) => {
-			await consumer.subscribe({ topic, fromBeginning: true });
-		});
-
 		await consumer.run({
 			eachMessage: async ({ topic, partition, message }) => {
 				try{
@@ -79,4 +81,4 @@ const run = async () => {
 		console.error(error);
 	}
 };
-run();
+subscribe();
